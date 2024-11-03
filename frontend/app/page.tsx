@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
 import OpenAI from 'openai';
 import ReactMarkdown from 'react-markdown';
+import jsPDF from 'jspdf';
 
 const agentId = "agent_8ffe11ae048b9c67b50cedb45d";
 
@@ -154,7 +155,24 @@ export default function Home() {
         temperature: 0.7,
       });
 
-      setReport(completion.choices[0].message.content || "");
+      const reportText = completion.choices[0].message.content || "";
+      setReport(reportText);
+
+      // Generate PDF
+      const pdf = new jsPDF();
+      
+      // Add title
+      pdf.setFontSize(16);
+      pdf.text('Medical Conversation Report', 20, 20);
+      
+      // Add content with word wrap
+      pdf.setFontSize(12);
+      const splitText = pdf.splitTextToSize(reportText, 170); // 170 is the max width
+      pdf.text(splitText, 20, 40);
+
+      // Save the PDF
+      pdf.save('medical-report.pdf');
+
     } catch (error) {
       console.error("Failed to generate report:", error);
       setReport("Error generating report. Please try again.");
